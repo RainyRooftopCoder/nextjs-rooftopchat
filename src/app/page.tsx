@@ -20,8 +20,15 @@ export default function Home() {
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                const res = await api.get('/auth/checkUser');
-                setUser(res.data);
+                const accessToken: string | null = localStorage.getItem('accessToken');
+
+                if (accessToken) {
+                    const res = await api.get('/auth/checkUser');
+                    setUser(res.data);
+                } else {
+                    alert('로그인 후 이용가능합니다.');
+                    window.location.href = '/login';
+                }
             } catch (err) {
                 alert('로그인 후 이용가능합니다.');
                 window.location.href = '/login';

@@ -14,8 +14,15 @@ export default function LoginPage() {
             console.log('axios to:', process.env.NEXT_PUBLIC_API_URL + '/auth/login');
 
             const res = await api.post('/auth/login', { email, password });
-            localStorage.setItem('accessToken', res.data.accessToken);
-            router.push('/main');
+
+            if (res.status === 201) {
+                localStorage.setItem('accessToken', res.data.accessToken);
+                router.push('/');
+            } else {
+                return alert('로그인 실패');
+            }
+
+            // router.push('/main');
         } catch (err) {
             alert(`로그인 실패 \n${err}`);
         }
@@ -38,8 +45,11 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 className="border px-4 py-2 mb-4 rounded w-64"
             />
-            <button onClick={login} className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+            <button onClick={login} className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded w-64">
                 로그인
+            </button>
+            <button onClick={() => (window.location.href = '/register')} className="text-blue-500 py-2 hover:underline">
+                회원가입
             </button>
         </main>
     );
