@@ -17,7 +17,7 @@ export default function LoginPage() {
 
             if (res.status === 201) {
                 localStorage.setItem('accessToken', res.data.accessToken);
-                router.push('/');
+                router.push('/main');
             } else {
                 return alert('로그인 실패');
             }

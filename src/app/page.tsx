@@ -37,16 +37,4 @@ export default function Home() {
 
         fetchUser();
     }, []);
-
-    return (
-        <main>
-            <h1>안녕하세요. {user?.nickname}님.</h1>
-            <div>채팅 목록</div>
-            <ul>
-                {rooms.map((room) => {
-                    return <li key={room.id}>{room.name}</li>;
-                })}
-            </ul>
-        </main>
-    );
 }
