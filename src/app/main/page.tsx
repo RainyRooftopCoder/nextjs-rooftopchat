@@ -1,6 +1,7 @@
 'use client';
 
 import api from '@/lib/axios';
+import socket from '@/lib/socket';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -34,10 +35,15 @@ export default function MainPage() {
 
         fetchUser();
 
-        setMessage([
-            { id: 1, sender: 'admin', content: '환영합니다.', timestamp: '09:00' },
-            { id: 2, sender: 'tester', content: '안녕하세요.', timestamp: '09:01' },
-        ]);
+        setMessage([{ id: 1, sender: 'admin', content: '환영합니다.', timestamp: '09:00' }]);
+
+        socket.on('message', (msg: Message) => {
+            setMessage((prev) => [...prev, msg]);
+        });
+
+        return () => {
+            socket.off('message');
+        };
     }, []);
 
     const sendMessage = () => {
@@ -49,7 +55,7 @@ export default function MainPage() {
             timestamp: new Date().toLocaleTimeString(),
         };
 
-        setMessage((prev) => [...prev, newMsg]);
+        socket.emit('message', newMsg);
         setInput('');
     };
 
@@ -59,12 +65,29 @@ export default function MainPage() {
 
             <div className="w-full max-w-xl border rounded p-4 h-[500px] flex flex-col bg-white">
                 <div className="flex-1 overflow-y-auto mb-4">
-                    {messages.map((msg) => (
-                        <div key={msg.id} className="mb-2">
-                            <span className="font-bold text-blue-600">{msg.sender}</span>: {msg.content}
-                            <span className="text-sm text-gray-400 ml-2">{msg.timestamp}</span>
-                        </div>
-                    ))}
+                    {messages.map((msg) => {
+                        const isMine = msg.sender === user?.nickname;
+
+                        // <div key={msg.id} className="mb-2">
+                        //     <span className="font-bold text-blue-600">{msg.sender}</span>:
+                        //     <span className="text-black">{msg.content}</span>
+                        //     <span className="text-sm text-gray-400 ml-2">{msg.timestamp}</span>
+                        // </div>
+
+                        return (
+                            <div key={msg.id} className={`mb-2 flex ${isMine ? 'justify-end' : 'justify-start'}`}>
+                                <div
+                                    className={`max-w-[70%] px-3 py-2 rounded shadow-sm ${
+                                        isMine ? 'bg-blue-100 text-right' : 'bg-gray-100 text-left'
+                                    }`}
+                                >
+                                    <div className="font-bold text-blue-600">{msg.sender}</div>
+                                    <div className="text-black">{msg.content}</div>
+                                    <div className="text-sm text-gray-400 mt-1">{msg.timestamp}</div>
+                                </div>
+                            </div>
+                        );
+                    })}
                 </div>
 
                 <div className="flex space-x-2">
@@ -73,7 +96,7 @@ export default function MainPage() {
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-                        className="flex-1 border px-4 py-2 rounded"
+                        className="flex-1 border px-4 py-2 text-black rounded"
                         placeholder="메시지를 입력하세요"
                     />
                     <button
